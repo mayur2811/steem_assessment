@@ -1,10 +1,10 @@
 const express = require('express');
 
-var app = express();
+const app = express();
 
-var authC = require('../controllers/auth.controller');
+const authC = require('../controllers/auth.controller');
 
-var router = express.Router();
+const router = express.Router();
 
 router.post('/user/login', authC.userLogin);
 router.post('/user/register', authC.userRegistration);

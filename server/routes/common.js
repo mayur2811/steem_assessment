@@ -1,9 +1,9 @@
 const express = require('express');
-var app = express();
+const app = express();
 
-var commonController = require('../controllers/common.controller');
+const commonController = require('../controllers/common.controller');
 
-var router = express.Router();
+const router = express.Router();
 
 router.route('/state')
   .get(commonController.getStateList)
