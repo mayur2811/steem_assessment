@@ -1,41 +1,61 @@
-pragma solidity >=0.4.25 <0.6.0;
+pragma solidity >=0.5.0 <0.6.0;
 
 import "./HomeTransaction.sol";
 
 contract Factory {
-  HomeTransaction[] contracts;
+    HomeTransaction[] contracts;
 
-  function create(
+    event ContractCreated(
+        address indexed creator,
+        address contractAddress,
+        uint index
+    );
+
+    function create(
         string memory _address,
         string memory _zip,
         string memory _city,
         uint _realtorFee,
         uint _price,
         address payable _seller,
-        address payable _buyer) public returns(HomeTransaction homeTransaction)  {
-    homeTransaction = new HomeTransaction(
-      _address,
-      _zip,
-      _city,
-      _realtorFee,
-      _price,
-      msg.sender,
-      _seller,
-      _buyer);
-    contracts.push(homeTransaction);
-  }
+        address payable _buyer
+    ) public returns (HomeTransaction homeTransaction) {
+        homeTransaction = new HomeTransaction(
+            _address,
+            _zip,
+            _city,
+            _realtorFee,
+            _price,
+            msg.sender,
+            _seller,
+            _buyer
+        );
+        contracts.push(homeTransaction);
 
-  function getInstance(uint index) public view returns (HomeTransaction instance) {
-    require(index < contracts.length, "index out of range");
+        emit ContractCreated(
+            msg.sender,
+            address(homeTransaction),
+            contracts.length - 1
+        );
+    }
 
-    instance = contracts[index];
-  }
+    function getInstance(
+        uint index
+    ) public view returns (HomeTransaction instance) {
+        require(index < contracts.length, "index out of range");
 
-  function getInstances() public view returns (HomeTransaction[] memory instances) {
-    instances = contracts;
-  }
+        instance = contracts[index];
+    }
 
-  function getInstanceCount() public view returns (uint count) {
-    count = contracts.length;
-  }
+    function getInstances()
+        public
+        view
+        returns (HomeTransaction[] memory instances)
+    {
+        instances = contracts;
+    }
+
+    function getInstanceCount() public view returns (uint count) {
+        count = contracts.length;
+    }
 }

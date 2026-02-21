@@ -1,11 +1,10 @@
 const express = require('express');
 const path = require('path');
-const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
 const http = require('http');
-const bodyParser = require('body-parser');
 const config = require('./config/config');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
 require('dotenv').config();
 
 const app = express();
@@ -18,8 +17,10 @@ const corsOptions = {
 };
 
 app.use(express.static(path.join(__dirname, 'uploads')));
-
 app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
 
 const users = require('./routes/users');
 const auth = require('./routes/auth');
@@ -34,6 +35,10 @@ app.use('/api/auth', auth);
 app.use('/api/common', common);
 app.use('/api/property', property);
 app.use('/api/email', email);
+
+// Error handling middleware
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
 

@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
-var Grid = require('gridfs-stream');
+const Grid = require('gridfs-stream');
 
 const helpers = require('../providers/helper');
-var propertyType = require('../models/propertyTypes');
-var Property = require('../models/property');
+const propertyType = require('../models/propertyTypes');
+const Property = require('../models/property');
 
-var gfs;
-var conn = mongoose.connection;
+let gfs;
+const conn = mongoose.connection;
 conn.on('connected', () => {
   gfs = Grid(conn.db, mongoose.mongo);
   gfs.collection('imageMeta');
@@ -22,7 +22,7 @@ module.exports = {
     });
   },
   addPropertyType: (req, res) => {
-    var proptyp = new propertyType();
+    const proptyp = new propertyType();
 
     proptyp.title = req.body.title;
     proptyp.type = req.body.type;
@@ -40,7 +40,7 @@ module.exports = {
     try {
       if (req.files && req.files.length)
         req.files.forEach(ele => imgs.push(ele.filename))
-      var slug = await helpers.slugGenerator(req.body.title, 'title', 'property');
+      const slug = await helpers.slugGenerator(req.body.title, 'title', 'property');
       req.body.slug = slug;
       req.body.type = req.body.Proptype;
       req.body.cornrPlot = req.body.cornrPlot ? true : false;
@@ -76,12 +76,12 @@ module.exports = {
   },
   getSingleProperty: async (req, res) => {
     try {
-      var result = await Property.findOne({ slug: req.params.propertySlug })
+      const result = await Property.findOne({ slug: req.params.propertySlug })
         .populate('city', 'name')
         .populate('state', 'name')
         .populate('type', 'title');
 
-      var files = [];
+      let files = [];
       if (result && result.images.length) {
         files = await gfs.files.find({ filename: { $in: result.images } }).toArray();
       }
@@ -108,9 +108,8 @@ module.exports = {
   },
   markAsSold: async (req, res) => {
     try {
-      const result = await Property.update({ slug: req.params.propertySlug }, { status: req.body.status });
-      console.log({ result });
-      if (result && result.nModified == 1) res.status(200).json({ result, message: "Property has been updated Successfully" });
+      const result = await Property.updateOne({ slug: req.params.propertySlug }, { status: req.body.status });
+      if (result && result.modifiedCount === 1) res.status(200).json({ result, message: "Property has been updated Successfully" });
       else throw new Error('Error in updating property');
     }
     catch (err) {
@@ -118,7 +117,7 @@ module.exports = {
     }
   },
   filterProperties: (req, res) => {
-    var query = {};
+    const query = {};
     if (req.query.propertyFor)
       query['propertyFor'] = { $in: req.query.propertyFor.split(",") }
     if (req.query.type)
@@ -131,7 +130,7 @@ module.exports = {
       query['userId'] = { $ne: req.query.notUserId }
     if (req.query.status)
       query['status'] = { $in: req.query.status.split(",") }
-    console.log({ query });
+
     Property.find(query)
       .populate('city', 'name')
       .populate('state', 'name')
@@ -146,7 +145,6 @@ module.exports = {
   },
   testController: async (req, res) => {
     const testData = await Property.find({ updatedOn: { $gte: '2019-04-01' } })
-    console.log({ testData });
     return res.send(testData);
   },
   showGFSImage: (req, res) => {
