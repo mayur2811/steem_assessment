@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-var state_model = require('../models/state');
-var city_model = require('../models/city');
-var users = require('../models/users');
+const state_model = require('../models/state');
+const city_model = require('../models/city');
+const users = require('../models/users');
 
 module.exports = {
   getStateList: (req, res) => {
@@ -9,17 +9,19 @@ module.exports = {
       .exec((err, data) => {
         if (err)
           res.status(400).send(err);
-        res.status(200).send(data);
+        else
+          res.status(200).send(data);
       });
   },
   addState: (req, res) => {
-    var state = new state_model();
+    const state = new state_model();
     state.name = req.body.name;
 
     state.save((err) => {
       if (err)
-        res.send(err);
-      res.json({ message: 'State added successfully' });
+        res.status(400).send(err);
+      else
+        res.json({ message: 'State added successfully' });
     })
   },
   getAllCities: (req, res) => {
@@ -28,7 +30,8 @@ module.exports = {
       .exec((err, data) => {
         if (err)
           res.status(400).send(err);
-        res.status(200).json(data);
+        else
+          res.status(200).json(data);
       });
   },
   getCityList: (req, res) => {
@@ -37,14 +40,14 @@ module.exports = {
       .exec((err, data) => {
         if (err)
           res.status(400).send(err);
-        res.status(200).json(data);
+        else
+          res.status(200).json(data);
       });
   },
   addCity: async (req, res) => {
     try {
-      var city = new city_model(req.body);
+      const city = new city_model(req.body);
       const result = await city.save();
-      console.log({ result });
       if (result) res.status(200).json({ message: 'City added successfully' });
       else throw new Error('Something Went Wrong');
     }
@@ -53,14 +56,15 @@ module.exports = {
     }
   },
   removeCity: (req, res) => {
-    city_model.remove({ _id: req.params.cityId }, (err, result) => {
+    city_model.deleteOne({ _id: req.params.cityId }, (err, result) => {
       if (err)
         res.status(400).send(err);
-      res.status(200).json({ message: 'City removed successfully', data: result });
+      else
+        res.status(200).json({ message: 'City removed successfully', data: result });
     })
   },
   checkemailAvailability: (req, res) => {
-    var email = req.params.email;
+    const email = req.params.email;
 
     users.find({ email: email }, (err, result) => {
       if (err)
