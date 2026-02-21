@@ -2,6 +2,11 @@ const { errorHandler } = require('../middleware/errorHandler');
 
 describe('Error Handler Middleware', () => {
   let mockReq, mockRes, mockNext;
+  let originalNodeEnv;
+
+  beforeAll(() => {
+    originalNodeEnv = process.env.NODE_ENV;
+  });
 
   beforeEach(() => {
     mockReq = {};
@@ -10,6 +15,11 @@ describe('Error Handler Middleware', () => {
       json: jest.fn().mockReturnThis(),
     };
     mockNext = jest.fn();
+  });
+
+  afterEach(() => {
+    process.env.NODE_ENV = originalNodeEnv;
+    jest.clearAllMocks();
   });
 
   test('should return 500 status by default', () => {
@@ -52,6 +62,43 @@ describe('Error Handler Middleware', () => {
     expect(mockRes.status).toHaveBeenCalledWith(500);
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'process.exit(1)' })
+    );
+  });
+
+  test('includes stack in response when NODE_ENV is development', () => {
+    process.env.NODE_ENV = 'development';
+    const error = new Error('Dev error');
+    errorHandler(error, mockReq, mockRes, mockNext);
+
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Dev error',
+        stack: expect.any(String),
+      })
+    );
+  });
+
+  test('omits stack in response when NODE_ENV is production', () => {
+    process.env.NODE_ENV = 'production';
+    const error = new Error('Prod error');
+    errorHandler(error, mockReq, mockRes, mockNext);
+
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        stack: expect.anything(),
+      })
+    );
+  });
+
+  test('omits stack in response when NODE_ENV is unset', () => {
+    delete process.env.NODE_ENV;
+    const error = new Error('No env error');
+    errorHandler(error, mockReq, mockRes, mockNext);
+
+    expect(mockRes.json).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        stack: expect.anything(),
+      })
     );
   });
 });

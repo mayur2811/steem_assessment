@@ -28,7 +28,7 @@ module.exports = {
                   email: data["email"],
                   isAdmin: data["isAdmin"]
                 };
-                const token = jwt.sign({ user: jwtData }, secretKey);
+                const token = jwt.sign({ user: jwtData }, secretKey, { expiresIn: '1h' });
                 res
                   .status(200)
                   .json({ message: "Login Successful", token: token });
@@ -41,7 +41,7 @@ module.exports = {
   userRegistration: (req, res) => {
     const user = new userM();
     user.fname = req.body.fname;
-    user.lname = req.body.lname;
+    user.lname = req.body.lname || req.body.lName;
     user.email = req.body.email;
     user.phoneNo = req.body.phoneNo;
     user.state = req.body.state;

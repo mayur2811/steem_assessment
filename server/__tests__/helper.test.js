@@ -16,8 +16,24 @@ describe('Helper: isKeyMissing', () => {
     expect(isKeyMissing(obj, [])).toBe(false);
   });
 
-  test('should detect falsy values as missing', () => {
+  test('should detect empty string as missing', () => {
     const obj = { name: '', email: 'test@test.com' };
+    expect(isKeyMissing(obj, ['name', 'email'])).toBe('name');
+  });
+
+  test('should detect 0 and false as missing (falsy check)', () => {
+    const obj = { count: 0, active: false };
+    // Current implementation treats all falsy values as missing
+    expect(isKeyMissing(obj, ['count', 'active'])).toBe('count');
+  });
+
+  test('should detect undefined keys as missing', () => {
+    const obj = { name: 'John' };
+    expect(isKeyMissing(obj, ['name', 'missing'])).toBe('missing');
+  });
+
+  test('should detect null values as missing', () => {
+    const obj = { name: null, email: 'test@test.com' };
     expect(isKeyMissing(obj, ['name', 'email'])).toBe('name');
   });
 });
